@@ -42,20 +42,71 @@
         return arr[Math.floor(Math.random() * arr.length)]
     }
 
+    const emulateClickingText = () => {
+        return {
+            x: Math.floor(Math.random() * (291 - 60 + 1)) + 60,
+            y: Math.floor(Math.random() * (74 - 43 + 1)) + 43
+        }
+    }
+
+    const emulateClickingBtn = () => {
+        return {
+            x: Math.floor(Math.random() * (280 - 70 + 1)) + 70,
+            y: Math.floor(Math.random() * (190 - 160 + 1)) + 160
+        }
+    }
+
+    function simulateMouse(x, y) {
+        const element = document.elementFromPoint(x, y)
+
+        const move = new MouseEvent('mousemove', {
+            bubbles: true,
+            cancelable: true,
+            clientX: x,
+            clientY: y
+        })
+
+        const click = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            clientX: x,
+            clientY: y
+        })
+
+        if (element) {
+            element.dispatchEvent(move)
+            console.log(element)
+            if (!btn.disabled) {
+                element.dispatchEvent(click)
+            }
+        }
+    }
+
+
     function start() {
         const delay = Math.floor(Math.random() * (10000 - 1000 + 1)) + 1000;
 
         if (btn.disabled) {
             console.log("waiting for button to be ready")
         } else {
+
             setTimeout(() => {
+                const getTextCord = emulateClickingText()
+                const getBtnCord = emulateClickingBtn()
+
+                console.log(`clicking text area at x:${getTextCord.x}, y:${getTextCord.y}`)
+                simulateMouse(getTextCord.x, getTextCord.y)
                 const a = document.querySelector("._container_1dr62_1 > textarea")
                 a.value = `${generateRandomPrompt()}`
 
-                console.log("button is ready! clicking....")
 
+                console.log("button is ready! clicking....")
                 setTimeout(() => {
-                    btn.click()
+                    const x = getBtnCord.x
+                    const y = getBtnCord.y
+
+                    console.log(`clicking button at x:${x}, y: ${y}`)
+                    simulateMouse(x, y)
                 }, 5000)
 
                 console.log(`waited ${delay + 5000}ms before clicking the button..`)
