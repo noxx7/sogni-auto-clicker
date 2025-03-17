@@ -1,8 +1,8 @@
 (function autoClick() {
-    const btn = document.querySelector("._variant-primary_1a2p7_52");
+    const btn = document.querySelector("._field_nktxq_67 > ._variant-primary_1a2p7_52");
     const interval = 10000
 
-    const prompTextArea = document.querySelector(".baseInput")
+    const a = document.querySelector("._container_1dr62_1 > textarea")
 
     const subjects = [
         'a futuristic cityscape', 'a medieval castle', 'a cyberpunk hacker', 'ancient ruins in the jungle',
@@ -44,15 +44,8 @@
 
     const emulateClickingText = () => {
         return {
-            x: Math.floor(Math.random() * (291 - 60 + 1)) + 60,
-            y: Math.floor(Math.random() * (74 - 43 + 1)) + 43
-        }
-    }
-
-    const emulateClickingBtn = () => {
-        return {
-            x: Math.floor(Math.random() * (280 - 70 + 1)) + 70,
-            y: Math.floor(Math.random() * (190 - 160 + 1)) + 160
+            x: Math.floor(Math.random() * (270 - 70 + 1)) + 70,
+            y: Math.floor(Math.random() * (64 - 53 + 1)) + 53
         }
     }
 
@@ -76,8 +69,9 @@
         if (element) {
             element.dispatchEvent(move)
             console.log(element)
-            if (!btn.disabled) {
+            if (btn && !btn.disabled || a) {
                 element.dispatchEvent(click)
+                console.log(`clicked ${element}`)
             }
         }
     }
@@ -89,28 +83,26 @@
         if (btn.disabled) {
             console.log("waiting for button to be ready")
         } else {
-
+            console.log("[creating new prompt]")
             setTimeout(() => {
                 const getTextCord = emulateClickingText()
-                const getBtnCord = emulateClickingBtn()
 
-                console.log(`clicking text area at x:${getTextCord.x}, y:${getTextCord.y}`)
+                console.log(`moving to x:${getTextCord.x}, y:${getTextCord.y}`)
                 simulateMouse(getTextCord.x, getTextCord.y)
-                const a = document.querySelector("._container_1dr62_1 > textarea")
-                a.value = `${generateRandomPrompt()}`
-
+                a.textContent = `${generateRandomPrompt()}`
+                a.dispatchEvent(new Event("input", { bubbles: true }))
+                console.log(`prompt: ${a.textContent}`)
 
                 console.log("button is ready! clicking....")
                 setTimeout(() => {
-                    const x = getBtnCord.x
-                    const y = getBtnCord.y
+                    const rect = btn.getBoundingClientRect();
+                    const x = rect.left + rect.width / 2;
+                    const y = rect.top + rect.height / 2;
 
-                    console.log(`clicking button at x:${x}, y: ${y}`)
+                    console.log(`moving to x:${x}, y: ${y}`)
                     simulateMouse(x, y)
-                }, 5000)
-
-                console.log(`waited ${delay + 5000}ms before clicking the button..`)
-                console.log(`prompt: ${a.value}`)
+                    console.log(`waited ${delay + 2000}ms before clicking the button..`)
+                }, 2000)
             }, delay)
         }
     }
