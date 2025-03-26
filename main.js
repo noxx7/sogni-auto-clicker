@@ -1,12 +1,43 @@
 (function autoClick() {
     const btn = document.querySelector("._field_1uhfe_67 > ._variant-primary_1a2p7_52");
     const a = document.querySelector("._container_1dr62_1 > textarea")
-    const sidebarBtn = document.querySelector("._sidebarToggle_1uhfe_38")
+    const sidebarBtn = document.querySelector("._creatorPage_9yeqj_1 > ._sidebarToggle_1uhfe_38")
     const sidebarActive = "_sidebarToggleActive_1uhfe_55"
     const sidebarCreatorBtn = document.querySelector("._navBarBtn_lnd69_77")
     const interval = 10000
 
     const url = "https://app.sogni.ai/creator"
+
+    let jobID = ""
+
+    const wsListener = () => {
+        const requestMessage = WebSocket.prototype.send
+        WebSocket.prototype.send = function (data) {
+            const a = atob(data)
+            const b = JSON.parse(a)
+            jobID = b
+            console.log(`[CREATING PROJECT ID:${jobID}]`)
+            return requestMessage.apply(this, arguments)
+        }
+    }
+
+    const getStatus = () => {
+        const f = window.f
+        window.fetch = async function (input, init) {
+            const url = typeof input === "string" ? input : input.url
+            if (url.includes(`https://api.sogni.ai/v1/projects/${jobID}`)) {
+                const response = await f(input, init)
+                const cresponse = response.clone()
+                cresponse.text().then((data) => {
+                    const d = JSON.parse(data)
+                    console.log("[FETCH REQUEST]:", url)
+                    console.log("[FETCH RESPONSE]: ", d.status)
+
+                    return d.status
+                })
+            }
+        }
+    }
 
     const subjects = [
         'a futuristic cityscape', 'a medieval castle', 'a cyberpunk hacker', 'ancient ruins in the jungle',
@@ -144,7 +175,7 @@
         return getRandomElement(promptVariations)
     }
 
-    const emulateClickingText = () => {
+    const gettextareaCord = () => {
         return {
             x: Math.floor(Math.random() * (270 - 70 + 1)) + 70,
             y: Math.floor(Math.random() * (64 - 53 + 1)) + 53
@@ -152,7 +183,6 @@
     }
 
     function simulateMouse(x, y) {
-        console.log(`simulating mouse movement to x: ${x}, y: ${y}`)
         const element = document.elementFromPoint(x, y)
 
         const move = new MouseEvent('mousemove', {
@@ -189,43 +219,38 @@
     function start() {
         const delay = Math.floor(Math.random() * (10000 - 1000 + 1)) + 1000;
 
+        wsListener()
+        const status = getStatus()
+
         if (window.location.href === url) {
-            if (sidebarBtn.classList[1] === sidebarActive) {
-                const sideBarRect = sidebarBtn.getBoundingClientRect()
-                const sideBarX = sideBarRect.left + sideBarRect.width / 2
-                const sideBarY = sideBarRect.top + sideBarRect.height / 2
-
-                simulateMouse(sideBarX, sideBarY)
+            if (btn.disabled) {
+                console.log("waiting for button to be ready")
             } else {
-                if (btn.disabled) {
-                    console.log("waiting for button to be ready")
+                if (a.textContent.length > 0) {
+                    console.log("[deleting previous prompt]")
+                    a.textContent = ""
+                    a.dispatchEvent(new Event("input", { bubbles: true }))
                 } else {
-                    if (a.textContent.length > 0) {
-                        console.log("[deleting previous prompt]")
-                        a.textContent = ""
+                    setTimeout(() => {
+                        console.log("[creating new prompt]")
+                        const textareaCord = gettextareaCord()
+
+                        console.log(`moving to x:${textareaCord.x}, y:${textareaCord.y}`)
+                        simulateMouse(textareaCord.x, textareaCord.y)
+                        a.textContent = `${generateRandomPrompt()}`
                         a.dispatchEvent(new Event("input", { bubbles: true }))
-                    } else {
+                        console.log(`prompt: ${a.textContent}`)
+
+                        console.log("button is ready! clicking....")
                         setTimeout(() => {
-                            console.log("[creating new prompt]")
-                            const getTextCord = emulateClickingText()
+                            const generateBtnRect = btn.getBoundingClientRect();
+                            const generateBtnX = generateBtnRect.left + generateBtnRect.width / 2
+                            const generateBtnY = generateBtnRect.top + generateBtnRect.height / 2
 
-                            console.log(`moving to x:${getTextCord.x}, y:${getTextCord.y}`)
-                            simulateMouse(getTextCord.x, getTextCord.y)
-                            a.textContent = `${generateRandomPrompt()}`
-                            a.dispatchEvent(new Event("input", { bubbles: true }))
-                            console.log(`prompt: ${a.textContent}`)
-
-                            console.log("button is ready! clicking....")
-                            setTimeout(() => {
-                                const generateBtnRect = btn.getBoundingClientRect();
-                                const generateBtnX = generateBtnRect.left + generateBtnRect.width / 2
-                                const generateBtnY = generateBtnRect.top + generateBtnRect.height / 2
-
-                                simulateMouse(generateBtnX, generateBtnY)
-                                console.log(`waited ${delay + 2000}ms before clicking the button..`)
-                            }, 2000)
-                        }, delay)
-                    }
+                            simulateMouse(generateBtnX, generateBtnY)
+                            console.log(`waited ${delay + 2000}ms before clicking the button..`)
+                        }, 2000)
+                    }, delay)
                 }
             }
         } else {
