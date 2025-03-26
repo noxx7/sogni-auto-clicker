@@ -8,37 +8,6 @@
 
     const url = "https://app.sogni.ai/creator"
 
-    let jobID = ""
-
-    const wsListener = () => {
-        const requestMessage = WebSocket.prototype.send
-        WebSocket.prototype.send = function (data) {
-            const a = atob(data)
-            const b = JSON.parse(a)
-            jobID = b
-            console.log(`[CREATING PROJECT ID:${jobID}]`)
-            return requestMessage.apply(this, arguments)
-        }
-    }
-
-    const getStatus = () => {
-        const f = window.f
-        window.fetch = async function (input, init) {
-            const url = typeof input === "string" ? input : input.url
-            if (url.includes(`https://api.sogni.ai/v1/projects/${jobID}`)) {
-                const response = await f(input, init)
-                const cresponse = response.clone()
-                cresponse.text().then((data) => {
-                    const d = JSON.parse(data)
-                    console.log("[FETCH REQUEST]:", url)
-                    console.log("[FETCH RESPONSE]: ", d.status)
-
-                    return d.status
-                })
-            }
-        }
-    }
-
     const subjects = [
         'a futuristic cityscape', 'a medieval castle', 'a cyberpunk hacker', 'ancient ruins in the jungle',
         'a haunted mansion', 'a post-apocalyptic survivor', 'a spaceship exploring deep space',
@@ -218,9 +187,6 @@
 
     function start() {
         const delay = Math.floor(Math.random() * (10000 - 1000 + 1)) + 1000;
-
-        wsListener()
-        const status = getStatus()
 
         if (window.location.href === url) {
             if (btn.disabled) {
